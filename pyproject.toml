@@ -8,6 +8,10 @@ readme = "README.rst"
 repository = "https://github.com/ianlini/wg-wizard"
 homepage = "https://github.com/ianlini/wg-wizard"
 packages = [{include = "wg_wizard", from = "src"}]
+classifiers = [
+    "Topic :: Utilities",
+    "Topic :: Security",
+]
 
 [tool.poetry.dependencies]
 python = "^3.10, <3.11"
