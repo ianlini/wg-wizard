@@ -152,10 +152,16 @@ If you haven't enabled the service:
    sudo systemctl enable "wg-quick@${WG_INTERFACE}.service"
    sudo systemctl start "wg-quick@${WG_INTERFACE}.service"
 
-You can turn on the WireGuard tunnel on your client (phone1),
-and it should work now.
+Now you can turn on the WireGuard tunnel on your client (phone1),
+and it should work.
 
-If the service is already running, there are 2 ways to apply the change.
+If the service is already running, you can check the config diff first:
+
+.. code-block:: sh
+
+   sudo diff "/etc/wireguard/${WG_INTERFACE}.conf~" "/etc/wireguard/${WG_INTERFACE}.conf"
+
+After confirming the changes, there are 2 ways to apply them.
 
 1. If you are not changing the wg-quick specific interface configs
    (e.g., Address, DNS, MTU, Table, PreUp, PostUp, PreDown,
