@@ -5,6 +5,8 @@ description = "Control all the WireGuard server and client configs in a centrali
 authors = ["Ian Lin <you@example.com>"]
 license = "MIT"
 readme = "README.rst"
+repository = "https://github.com/ianlini/wg-wizard"
+homepage = "https://github.com/ianlini/wg-wizard"
 packages = [{include = "wg_wizard", from = "src"}]
 
 [tool.poetry.dependencies]
