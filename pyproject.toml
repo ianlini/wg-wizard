@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "wg-wizard"
+version = "0.0.0.dev"  # the version will be updated automatically in the pipelines
+description = "Control all the WireGuard server and client configs in a centralized way."
+authors = ["Ian Lin <you@example.com>"]
+license = "MIT"
+readme = "README.rst"
+repository = "https://github.com/ianlini/wg-wizard"
+homepage = "https://github.com/ianlini/wg-wizard"
+packages = [{include = "wg_wizard", from = "src"}]
+classifiers = [
+    "Topic :: Utilities",
+    "Topic :: Security",
+]
+
+[tool.poetry.dependencies]
+python = "^3.10, <3.11"
+click = "^8.1.3"
+"ruamel.yaml" = "^0.17.21"
+pydantic = "^1.9.2"
+qrcode = "^7.3.1"
+
+[tool.poetry.group.linter.dependencies]
+flake8 = "^5.0.4"
+pep8-naming = "^0.13.2"
+flake8-import-order = "^0.18.1"
+flake8-bugbear = "^22.8.23"
+flake8-comprehensions = "^3.10.0"
+flake8-docstrings = "^1.6.0"
+flake8-logging-format = "^0.8.1"
+flake8-return = "^1.1.3"
+flake8-black = "^0.3.3"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.8.0"
+ipdb = "^0.13.9"
+ipython = "^8.5.0"
+esbonio = "^0.14.0"
+doc8 = "^1.0.0"
+
+[tool.poetry.scripts]
+wg-wizard = 'wg_wizard.cli:main'
+
+[tool.pytest.ini_options]
+log_format = "[%(asctime)s][%(levelname)s] %(name)s %(module)s %(lineno)d: %(message)s"
+log_level = "INFO"
+log_cli = true
+log_cli_level = "WARNING"
+log_file = "artifacts/pytest.log"
+log_file_format = "[%(asctime)s][%(levelname)s] %(name)s %(module)s %(lineno)d: %(message)s"
+log_file_date_format = "%Y-%m-%d %H:%M:%S"
+log_file_level = "INFO"
+testpaths = ["tests"]
+
+[tool.coverage]
+run.branch = true
+run.source = ["src/wg_wizard"]
+html.directory = "artifacts/htmlcov"
+xml.output = "artifacts/coverage.xml"
+
+[tool.black]
+target-version = ['py310']
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

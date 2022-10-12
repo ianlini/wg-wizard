@@ -1,0 +1,27 @@
+{
+  "version": "0.2",
+  "dictionaries": [
+    "python"
+  ],
+  "words": [
+    "bistiming",
+    "distro",
+    "genkey",
+    "genpsk",
+    "ianlini",
+    "ipdb",
+    "journalctl",
+    "keepalive",
+    "levelname",
+    "POSTROUTING",
+    "PREROUTING",
+    "preshared",
+    "pubkey",
+    "pydantic",
+    "qrcode",
+    "ruamel",
+    "stricturl",
+    "wlan",
+    "workdir"
+  ]
+}
