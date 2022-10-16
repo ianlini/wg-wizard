@@ -23,7 +23,7 @@ with multiple clients connecting to the VPN via the relay server.
 
 We assume that most people need a network architecture like this.
 If you want another architecture, you can still achieve some of them
-using the advance config.
+using the advance configuration.
 
 Why Do We Need wg-wizard
 ------------------------

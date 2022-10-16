@@ -134,6 +134,7 @@ def init(
     allow_all_server_ip,
     overwrite,
 ):
+    """Initialize a new wg-wizard config."""
     from .core import WgWizard, WgWizardConfig, WgWizardSecret
     from .utils import get_iptables_commands
 
@@ -193,6 +194,7 @@ def add_peer(
     client_persistent_keepalive,
     invert_qrcode,
 ):
+    """Add a new client to a wg-wizard config."""
     from .core import WgWizard, WgWizardPeerConfig, export_wg_quick_config
 
     wg_wizard = WgWizard.from_dir(config_dir, interface)
@@ -244,8 +246,13 @@ def add_peer(
     multiple=True,
     help="Regenerate a specific peer secret. Can be specified multiple times",
 )
-@option("--force", "-f", is_flag=True, help="Operate without asking for confirmation.")
+@option(
+    "--overwrite/--no-overwrite",
+    is_flag=True,
+    help="Whether to overwrite the keys without confirmation.",
+)
 def generate_keys(interface, config_dir, all, server, missing, peer, force):
+    """Generate or regenerate public, private and preshared keys."""
     from .core import WgWizard
 
     wg_wizard = WgWizard.from_dir(config_dir, interface)
@@ -264,6 +271,7 @@ def generate_keys(interface, config_dir, all, server, missing, peer, force):
 @interface_option
 @config_dir_option
 def check(interface, config_dir):
+    """Check whether the wg-wizard config is ready for export."""
     from .core import WgWizard
 
     WgWizard.from_dir(config_dir, interface).check_secret()
@@ -285,6 +293,7 @@ def check(interface, config_dir):
 )
 @invert_qrcode_option
 def export_server_config(interface, config_dir, text, qrcode, invert_qrcode):
+    """Export a wg-quick server config."""
     from .core import export_wg_quick_config_from_files
 
     export_wg_quick_config_from_files(
@@ -315,6 +324,7 @@ def export_server_config(interface, config_dir, text, qrcode, invert_qrcode):
 )
 @invert_qrcode_option
 def export_client_config(interface, config_dir, name, text, qrcode, invert_qrcode):
+    """Export a wg-quick client config."""
     from .core import export_wg_quick_config_from_files
 
     export_wg_quick_config_from_files(
