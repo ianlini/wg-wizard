@@ -116,7 +116,7 @@ Follow the instruction to create the peer config. Example output:
 
 Normally, you can use the default values for almost all of the options.
 In the end, there will be a QR Code generated.
-You can now use your the `WireGuard app <https://www.wireguard.com/install/>`_
+You can now use your `WireGuard app <https://www.wireguard.com/install/>`_
 on your phone to scan the QR Code to import the config.
 If your client doesn't support QR Code, you can use another command to generate the text:
 
@@ -182,26 +182,26 @@ After confirming the changes, there are 2 ways to apply them.
 Troubleshooting
 ---------------
 
-Reading the service log:
+Read the service log:
 
 .. code-block:: sh
 
    journalctl -u "wg-quick@${WG_INTERFACE}.service" -f -n 1000
 
-Enabling the kernel log:
+Enable the kernel log:
 
 .. code-block:: sh
 
    sudo modprobe wireguard
    echo module wireguard +p | sudo tee /sys/kernel/debug/dynamic_debug/control
 
-Reading the kernel log:
+Read the kernel log:
 
 .. code-block:: sh
 
    journalctl -k -f -n 1000 | grep wireguard
 
-Debugging iptables:
+Debug iptables:
 
 .. code-block:: sh
 
