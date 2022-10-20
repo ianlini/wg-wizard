@@ -38,6 +38,10 @@ ipython = "^8.5.0"
 esbonio = "^0.14.0"
 doc8 = "^1.0.0"
 
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.1.3"
+
 [tool.poetry.scripts]
 wg-wizard = 'wg_wizard.cli:main'
 
