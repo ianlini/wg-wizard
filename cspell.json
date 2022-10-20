@@ -20,7 +20,9 @@
     "pydantic",
     "qrcode",
     "ruamel",
+    "setuptools",
     "stricturl",
+    "toxenv",
     "wlan",
     "workdir"
   ]

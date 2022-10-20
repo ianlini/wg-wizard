@@ -1,0 +1,28 @@
+name: wg0
+listen_port: 51820
+addresses:
+  - 192.168.10.1/24
+post_up:
+  - iptables -A FORWARD -i %i -o eth0 -j ACCEPT
+  - iptables -A FORWARD -i eth0 -o %i -j ACCEPT
+  - iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
+  - iptables -A FORWARD -i %i -o %i -j ACCEPT
+  - iptables -A INPUT -d 192.168.10.1 -i %i -j ACCEPT
+  - iptables -A INPUT -i %i -j DROP
+pre_down:
+  - iptables -D FORWARD -i %i -o eth0 -j ACCEPT
+  - iptables -D FORWARD -i eth0 -o %i -j ACCEPT
+  - iptables -t nat -D POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
+  - iptables -D FORWARD -i %i -o %i -j ACCEPT
+  - iptables -D INPUT -d 192.168.10.1 -i %i -j ACCEPT
+  - iptables -D INPUT -i %i -j DROP
+default_endpoint: example.com:51820
+peers:
+  client_0:
+    addresses:
+      - 192.168.10.2/32
+    server_allowed_ips:
+      - 192.168.10.2/32
+    client_allowed_ips:
+      - 0.0.0.0/0
+    client_persistent_keepalive: 25
