@@ -108,7 +108,7 @@ Follow the instruction to create the peer config. Example output:
    Name of the client: phone1
    Peer.PersistentKeepalive of the client [25]:
    Interface.Address of the client [192.168.10.2/32]:
-   Peer.AllowedIPs of the client [0.0.0.0/0]:
+   Peer.AllowedIPs of the client [0.0.0.0/0, ::/0]:
    [2022-10-04 16:40:01,337][INFO] wg_wizard.core: Writing config to /workdir/wg0.yml
    [2022-10-04 16:40:01,358][INFO] wg_wizard.core: Writing secret to /workdir/wg0_secret.json
    [2022-10-04 16:40:01,362][INFO] wg_wizard.cli: Client's wg-quick config QR Code:

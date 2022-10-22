@@ -25,4 +25,5 @@ peers:
       - 192.168.10.2/32
     client_allowed_ips:
       - 0.0.0.0/0
+      - ::/0
     client_persistent_keepalive: 25
