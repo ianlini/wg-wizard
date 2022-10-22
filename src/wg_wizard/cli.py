@@ -46,7 +46,7 @@ def main():
     type=int,
 )
 @option(
-    "--address",
+    "--addresses",
     "-a",
     prompt="Interface.Address of the relay server",
     help="Interface.Address of the relay server.",
@@ -127,7 +127,7 @@ def init(
     interface,
     config_dir,
     listen_port,
-    address,
+    addresses,
     default_endpoint,
     internet_interface_name,
     allow_intranet,
@@ -140,17 +140,18 @@ def init(
 
     if ":" not in default_endpoint:
         default_endpoint += f":{listen_port}"
+    addresses = [ip.strip() for ip in addresses.split(",")]
 
     post_up, pre_down = get_iptables_commands(
         internet_interface_name,
         allow_intranet,
         allow_all_server_ip,
-        wg_server_interfaces=[address],
+        wg_server_interfaces=addresses,
     )
     config = WgWizardConfig(
         name=interface,
         listen_port=listen_port,
-        addresses=[address],
+        addresses=addresses,
         post_up=post_up,
         pre_down=pre_down,
         default_endpoint=default_endpoint,
@@ -170,7 +171,7 @@ def init(
     help="Name of the peer.",
 )
 @option(
-    "--address",
+    "--addresses",
     "-a",
     help="Interface.Address of the client.",
 )
@@ -189,7 +190,7 @@ def add_peer(
     interface,
     config_dir,
     name,
-    address,
+    addresses,
     client_allowed_ips,
     client_persistent_keepalive,
     invert_qrcode,
@@ -204,12 +205,13 @@ def add_peer(
     if name in config.peers:
         raise ValueError("Peer name must be unique.")
 
-    # get default address and client_allowed_ips and then ask the user
-    if address is None:
-        address = click.prompt(
+    # get default addresses and client_allowed_ips and then ask the user
+    if addresses is None:
+        addresses = click.prompt(
             "Interface.Address of the client",
             default=str(config.find_next_available_interface()),
         )
+    addresses = [ip.strip() for ip in addresses.split(",")]
     if client_allowed_ips is None:
         client_allowed_ips = click.prompt(
             "Peer.AllowedIPs of the client", default="0.0.0.0/0, ::/0"
@@ -218,8 +220,8 @@ def add_peer(
 
     # add a peer to the config
     peer_config = WgWizardPeerConfig(
-        addresses=[address],
-        server_allowed_ips=[address],
+        addresses=addresses,
+        server_allowed_ips=addresses,
         client_allowed_ips=client_allowed_ips,
         client_persistent_keepalive=client_persistent_keepalive,
     )
