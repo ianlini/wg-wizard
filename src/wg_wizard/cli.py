@@ -212,14 +212,15 @@ def add_peer(
         )
     if client_allowed_ips is None:
         client_allowed_ips = click.prompt(
-            "Peer.AllowedIPs of the client", default="0.0.0.0/0"
+            "Peer.AllowedIPs of the client", default="0.0.0.0/0, ::/0"
         )
+    client_allowed_ips = [ip.strip() for ip in client_allowed_ips.split(",")]
 
     # add a peer to the config
     peer_config = WgWizardPeerConfig(
         addresses=[address],
         server_allowed_ips=[address],
-        client_allowed_ips=[client_allowed_ips],
+        client_allowed_ips=client_allowed_ips,
         client_persistent_keepalive=client_persistent_keepalive,
     )
     config.add_peer(name, peer_config)
