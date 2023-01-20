@@ -71,7 +71,8 @@ Follow the instruction to create the config. Example output:
    If you want to allow the clients to access the internet via the relay server, you must provide the interface name you want to forward the internet traffic to. It's usually eth0 or wlan0. You can check it by executing `ip addr`. If you provide an interface name {interface}, the following rules will be added:
    - iptables -A FORWARD -i %i -o {interface} -j ACCEPT
    - iptables -A FORWARD -i {interface} -o %i -j ACCEPT
-   - iptables -t nat -A POSTROUTING -s {network} -o {interface} -j MASQUERADEInterface name for connecting to the internet []: eth0
+   - iptables -t nat -A POSTROUTING -s {network} -o {interface} -j MASQUERADE
+   Interface name for connecting to the internet []: eth0
    Do you want to allow the clients to connect with each other? If yes, a rule will be added: `iptables -A FORWARD -i %i -o %i -j ACCEPT` [Y/n]:
    Do you want to allow the clients to connect to any IPs on the relay server? If no, only the IP of the WireGuard interface can be connected, that is, the following rules will be added:
    - iptables -A INPUT -d {wg_server_interface_ip} -i %i -j ACCEPT
