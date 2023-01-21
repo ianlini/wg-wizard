@@ -19,11 +19,12 @@ jobs:
         with:
           python-version: 3.11
       - run: echo "POETRY_HOME=${{ runner.temp }}/.poetry" >> ${GITHUB_ENV}
-      # - run: echo "${POETRY_HOME}/bin" >> ${GITHUB_PATH}
+      - run: echo "${POETRY_HOME}/bin" >> ${GITHUB_PATH}
       - name: Install Poetry
         run: |
-          python -m venv "${POETRY_HOME}" \
-          && "${POETRY_HOME}/bin/pip" install -U pip==22.2.2 wheel==0.37.1 setuptools==65.3.0 \
+          set -x \
+          && python -m venv "${POETRY_HOME}" \
+          && "${POETRY_HOME}/bin/pip" install -U pip wheel setuptools \
           && "${POETRY_HOME}/bin/pip" install "poetry==${POETRY_VERSION}"
       - run: poetry --version
       - uses: docker/setup-qemu-action@v2
