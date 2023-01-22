@@ -6,6 +6,7 @@ on:
       - "buildx"
   release:
     types: [published]
+  workflow_dispatch:
 
 
 jobs:
@@ -27,27 +28,29 @@ jobs:
             type=pep440,pattern={{version}}
             type=pep440,pattern={{major}}.{{minor}}
             type=pep440,pattern={{major}}
-      - run: |
-          echo '${{ steps.meta.outputs.tags }}' \
-          && echo '${{ steps.meta.outputs.labels }}' \
-          && echo '${{ github.ref_name }}' \
-          && echo '${{ github.ref_type }}'
-      - if: github.ref_type == 'tag'
-        run: echo ${{ github.ref_name }}
-      - if: github.ref_type != 'tag'
-        run: echo ${{ github.sha }}
-      - uses: actions/setup-python@v2
+      - name: Python package version (tag)
+        if: github.ref_type == 'tag'
+        run: echo 'PYTHON_PACKAGE_VERSION=${{ github.ref_name }}' >> ${GITHUB_ENV}
+      - name: Python package version (branch)
+        if: github.ref_type != 'tag'
+        run: echo 'PYTHON_PACKAGE_VERSION=${{ github.sha }}' >> ${GITHUB_ENV}
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.11
-      - run: echo "POETRY_HOME=${{ runner.temp }}/.poetry" >> ${GITHUB_ENV}
-      - run: echo "${POETRY_HOME}/bin" >> ${GITHUB_PATH}
+      - name: Poetry env
+        run: echo "POETRY_HOME=${{ runner.temp }}/.poetry" >> ${GITHUB_ENV}
+      - name: Poetry path
+        run: echo "${POETRY_HOME}/bin" >> ${GITHUB_PATH}
       - name: Install Poetry
         run: |
           set -x \
           && python -m venv "${POETRY_HOME}" \
           && "${POETRY_HOME}/bin/pip" install -U pip wheel setuptools \
           && "${POETRY_HOME}/bin/pip" install "poetry==${POETRY_VERSION}"
-      - run: poetry --version
+      - run: poetry version "${PYTHON_PACKAGE_VERSION}"
+      - name: Build and publish the PyPI package
+        if: github.ref_type == 'tag'
+        run: poetry publish --build --username __token__ --password "${PYPI_TOKEN}"
       - uses: docker/setup-qemu-action@v2
       - uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -55,11 +58,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # - name: Build and push
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     context: .
-      #     platforms: linux/amd64, linux/arm64, linux/386, linux/arm/v7, linux/arm/v6
-      #     push: true
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64, linux/arm64, linux/386, linux/arm/v7, linux/arm/v6
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
