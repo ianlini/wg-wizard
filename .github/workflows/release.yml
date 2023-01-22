@@ -33,7 +33,7 @@ jobs:
         run: echo 'PYTHON_PACKAGE_VERSION=${{ github.ref_name }}' >> ${GITHUB_ENV}
       - name: Python package version (branch)
         if: github.ref_type != 'tag'
-        run: echo 'PYTHON_PACKAGE_VERSION=${{ github.sha }}' >> ${GITHUB_ENV}
+        run: echo 'PYTHON_PACKAGE_VERSION=0.0.0.dev' >> ${GITHUB_ENV}
       - uses: actions/setup-python@v3
         with:
           python-version: 3.11
