@@ -10,7 +10,7 @@ RUN set -x && DEBIAN_FRONTEND=noninteractive \
     && rm -rf /var/lib/apt/lists/*
 
 ENV HOME=/root
-ENV POETRY_VERSION=1.2.0
+ENV POETRY_VERSION=1.3.2
 # Poetry use VIRTUAL_ENV to check whether we are already in a virtual env
 ENV VIRTUAL_ENV=${HOME}/venv
 ENV POETRY_HOME=${HOME}/.poetry
@@ -23,11 +23,18 @@ RUN --mount=type=cache,target=${HOME}/.cache set -x \
     && "${POETRY_HOME}/bin/pip" install "poetry==${POETRY_VERSION}"
 
 # install python packages
+COPY pyproject.toml poetry.lock /tmp/poetry/
+RUN --mount=type=cache,target=${HOME}/.cache set -x \
+    && cd /tmp/poetry/ \
+    && python -m venv "${VIRTUAL_ENV}" \
+    && pip install --upgrade pip==22.2.2 wheel==0.37.1 setuptools==65.3.0 \
+    && poetry install --no-interaction --no-ansi --only main --no-root \
+    && rm -rf /tmp/poetry/
+
+# install the root package
 COPY . ${HOME}/wg-wizard
 RUN --mount=type=cache,target=${HOME}/.cache set -x \
     && cd "${HOME}/wg-wizard" \
-    && python -m venv "${VIRTUAL_ENV}" \
-    && pip install --upgrade pip==22.2.2 wheel==0.37.1 setuptools==65.3.0 \
     && poetry install --no-interaction --no-ansi --only main \
     && _WG_WIZARD_COMPLETE=bash_source wg-wizard >> "${HOME}/.bashrc"
 
