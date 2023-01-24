@@ -34,7 +34,7 @@ jobs:
       - name: Python package version (branch)
         if: github.ref_type != 'tag'
         run: echo 'PYTHON_PACKAGE_VERSION=0.0.0.dev' >> ${GITHUB_ENV}
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.11
       - name: Poetry env
