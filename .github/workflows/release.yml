@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - "buildx"
+      - "main"
   release:
     types: [published]
   workflow_dispatch:
