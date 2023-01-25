@@ -16,18 +16,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/wg-wizard
-          flavor: |
-            latest=${{ startsWith(github.ref, 'refs/tags/') }}
-          tags: |
-            type=ref,event=branch
-            type=pep440,pattern={{version}}
-            type=pep440,pattern={{major}}.{{minor}}
-            type=pep440,pattern={{major}}
       - name: Python package version (tag)
         if: github.ref_type == 'tag'
         run: echo 'PYTHON_PACKAGE_VERSION=${{ github.ref_name }}' >> ${GITHUB_ENV}
@@ -48,9 +36,18 @@ jobs:
           && "${POETRY_HOME}/bin/pip" install -U pip wheel setuptools \
           && "${POETRY_HOME}/bin/pip" install "poetry==${POETRY_VERSION}"
       - run: poetry version "${PYTHON_PACKAGE_VERSION}"
-      - name: Build and publish the PyPI package
-        if: github.ref_type == 'tag'
-        run: poetry publish --build --username __token__ --password "${PYPI_TOKEN}"
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/wg-wizard
+          flavor: |
+            latest=${{ startsWith(github.ref, 'refs/tags/') }}
+          tags: |
+            type=ref,event=branch
+            type=pep440,pattern={{version}}
+            type=pep440,pattern={{major}}.{{minor}}
+            type=pep440,pattern={{major}}
       - uses: docker/setup-qemu-action@v2
       - uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -68,3 +65,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Build and publish the PyPI package
+        if: github.ref_type == 'tag'
+        run: poetry publish --build --username __token__ --password "${PYPI_TOKEN}"
