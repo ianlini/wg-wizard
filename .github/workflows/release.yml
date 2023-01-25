@@ -67,4 +67,4 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Build and publish the PyPI package
         if: github.ref_type == 'tag'
-        run: poetry publish --build --username __token__ --password "${PYPI_TOKEN}"
+        run: POETRY_PYPI_TOKEN_PYPI="${PYPI_TOKEN}" poetry publish --build
