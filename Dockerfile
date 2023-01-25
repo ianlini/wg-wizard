@@ -21,6 +21,8 @@ ENV POETRY_VERSION=1.3.2
 ENV VIRTUAL_ENV=${HOME}/venv
 ENV POETRY_HOME=${HOME}/.poetry
 ENV PATH=${VIRTUAL_ENV}/bin:${POETRY_HOME}/bin:${PATH}
+# https://github.com/rust-lang/cargo/issues/10303
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 # install poetry
 RUN --mount=type=cache,target=${HOME}/.cache --mount=type=cache,target=${HOME}/.cargo set -x \
