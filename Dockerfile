@@ -1,11 +1,17 @@
 FROM python:3.10.7-slim-bullseye
 
+ARG TARGETPLATFORM
 RUN set -x && DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         wireguard-tools \
+    && { \
+      if [ "${TARGETPLATFORM}" = 'linux/arm/v7' ]; then \
         # for poetry's dependencies if the wheels are not provided for the architecture
-        build-essential libssl-dev libffi-dev cargo \
+        apt-get install -y --no-install-recommends \
+          build-essential libssl-dev libffi-dev cargo; \
+      fi; \
+    } \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,9 +23,9 @@ ENV POETRY_HOME=${HOME}/.poetry
 ENV PATH=${VIRTUAL_ENV}/bin:${POETRY_HOME}/bin:${PATH}
 
 # install poetry
-RUN --mount=type=cache,target=${HOME}/.cache set -x \
+RUN --mount=type=cache,target=${HOME}/.cache --mount=type=cache,target=${HOME}/.cargo set -x \
     && python -m venv "${POETRY_HOME}" \
-    && "${POETRY_HOME}/bin/pip" install -U pip==22.2.2 wheel==0.37.1 setuptools==65.3.0 \
+    && "${POETRY_HOME}/bin/pip" install -U pip==22.3.1 wheel==0.38.4 setuptools==66.1.1 \
     && "${POETRY_HOME}/bin/pip" install "poetry==${POETRY_VERSION}"
 
 # install python packages
@@ -27,7 +33,7 @@ COPY pyproject.toml poetry.lock /tmp/poetry/
 RUN --mount=type=cache,target=${HOME}/.cache set -x \
     && cd /tmp/poetry/ \
     && python -m venv "${VIRTUAL_ENV}" \
-    && pip install --upgrade pip==22.2.2 wheel==0.37.1 setuptools==65.3.0 \
+    && pip install --upgrade pip==22.3.1 wheel==0.38.4 setuptools==66.1.1 \
     && poetry install --no-interaction --no-ansi --only main --no-root \
     && rm -rf /tmp/poetry/
 
