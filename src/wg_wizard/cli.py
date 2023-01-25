@@ -72,7 +72,7 @@ def main():
         "If you provide an interface name {interface}, the following rules will be added:\n"
         "- iptables -A FORWARD -i %i -o {interface} -j ACCEPT\n"
         "- iptables -A FORWARD -i {interface} -o %i -j ACCEPT\n"
-        "- iptables -t nat -A POSTROUTING -s {network} -o {interface} -j MASQUERADE"
+        "- iptables -t nat -A POSTROUTING -s {network} -o {interface} -j MASQUERADE\n"
         "Interface name for connecting to the internet"
     ),
     help="""
