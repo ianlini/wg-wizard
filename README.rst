@@ -1,7 +1,9 @@
 wg-wizard
 =========
 .. image:: https://github.com/ianlini/wg-wizard/actions/workflows/main.yml/badge.svg
-   :target: https://github.com/ianlini/wg-wizard/actions
+   :target: https://github.com/ianlini/wg-wizard/actions/workflows/main.yml
+.. image:: https://github.com/ianlini/wg-wizard/actions/workflows/release.yml/badge.svg
+   :target: https://github.com/ianlini/wg-wizard/actions/workflows/release.yml
 .. image:: https://img.shields.io/pypi/v/wg-wizard.svg
    :target: https://pypi.org/project/wg-wizard/
 .. image:: https://img.shields.io/pypi/l/wg-wizard.svg
