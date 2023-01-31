@@ -205,10 +205,10 @@ class WgWizard(StrictModel):
         server: bool = False,
         missing: bool = False,
         peers: Optional[list[str]] = None,
-        force: bool = True,
+        overwrite: bool = True,
     ) -> list[str]:
         if regenerate_all:
-            if not force:
+            if not overwrite:
                 click.confirm(
                     (
                         "All the keys will be regenerated and cannot be reverted. "
@@ -222,7 +222,7 @@ class WgWizard(StrictModel):
                 self.secret.generate_peer_secret(peer_name)
             return []
         if server:
-            if not force:
+            if not overwrite:
                 click.confirm(
                     (
                         "The server secret will be regenerated and cannot be reverted. "
@@ -232,7 +232,7 @@ class WgWizard(StrictModel):
                 )
             self.secret.regenerate_server_secret()
         for peer_name in peers:
-            if not force and peer_name in self.secret.peers:
+            if not overwrite and peer_name in self.secret.peers:
                 click.confirm(
                     (
                         f"The secret for peer '{peer_name}' will be regenerated "
