@@ -28,6 +28,7 @@ invert_qrcode_option = option(
 
 
 @click.group(context_settings={"max_content_width": 120})
+@click.version_option()
 def main():
     logging.basicConfig(
         level=logging.INFO, format="[%(asctime)s][%(levelname)s] %(name)s: %(message)s"
@@ -254,13 +255,17 @@ def add_peer(
     is_flag=True,
     help="Whether to overwrite the keys without confirmation.",
 )
-def generate_keys(interface, config_dir, all, server, missing, peer, force):
+def generate_keys(interface, config_dir, all, server, missing, peer, overwrite):
     """Generate or regenerate public, private and preshared keys."""
     from .core import WgWizard
 
     wg_wizard = WgWizard.from_dir(config_dir, interface)
     missing_peers = wg_wizard.generate_keys(
-        regenerate_all=all, server=server, missing=missing, peers=peer, force=force
+        regenerate_all=all,
+        server=server,
+        missing=missing,
+        peers=peer,
+        overwrite=overwrite,
     )
     if missing_peers:
         logger.info("Generated secret for missing peers %s.", missing_peers)
