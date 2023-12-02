@@ -1,4 +1,4 @@
-FROM python:3.10.7-slim-bullseye
+FROM python:3.10.13-slim-bookworm
 
 ARG TARGETPLATFORM
 RUN set -x && DEBIAN_FRONTEND=noninteractive \
