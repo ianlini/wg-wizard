@@ -16,6 +16,20 @@ and control all the server and client configs in a centralized way.
 
 .. contents::
 
+Why Do We Need wg-wizard
+------------------------
+
+When I was trying to build my own VPN, although WireGuard is quite simple,
+it was still hard to make everything right at the first trial.
+The 2 most common issues are incorrect iptables and unmatched server/client
+configs.
+Therefore, I built this tool to make these steps less error-prone by
+centralizing all the configs as one simple wizard config and generating the
+configs required by WireGuard when needed.
+Besides, the tool also provides some simple interactive CLI tools to help
+you create the wizard config easily, and it can generate QR code for you
+to set up your smart phone easily.
+
 Network Architecture
 --------------------
 
@@ -26,11 +40,6 @@ with multiple clients connecting to the VPN via the relay server.
 We assume that most people need a network architecture like this.
 If you want another architecture, you can still achieve some of them
 using the advance configuration.
-
-Why Do We Need wg-wizard
-------------------------
-
-TODO
 
 Prerequisite
 ------------
