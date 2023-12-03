@@ -130,7 +130,7 @@ class WgWizardPeerSecret(StrictModel):
             private_key=private_key,
             public_key=public_key,
             preshared_key=preshared_key,
-            issued_on=datetime.datetime.utcnow(),
+            issued_on=datetime.datetime.now(datetime.timezone.utc),
         )
 
     def check(self, name: str):
@@ -159,12 +159,12 @@ class WgWizardSecret(StrictModel):
         return cls(
             private_key=private_key,
             public_key=public_key,
-            issued_on=datetime.datetime.utcnow(),
+            issued_on=datetime.datetime.now(datetime.timezone.utc),
         )
 
     def regenerate_server_secret(self):
         self.private_key, self.public_key = gen_key_pair()
-        self.issued_on = datetime.datetime.utcnow()
+        self.issued_on = datetime.datetime.now(datetime.timezone.utc)
 
     @classmethod
     def from_file(cls, path: Path):
