@@ -7,7 +7,7 @@ import shlex
 import stat
 
 import click
-from pydantic import BaseModel, SecretStr, Extra
+from pydantic import BaseModel, ConfigDict, SecretStr
 
 from .wg import pubkey
 
@@ -17,19 +17,18 @@ def to_camel(string: str) -> str:
 
 
 class StrictModel(BaseModel):
-    class Config:
-        extra = Extra.forbid
-        validate_assignment = True
-        validate_all = True
-        json_encoders = {
-            SecretStr: lambda v: v.get_secret_value(),
-        }
+    model_config = ConfigDict(
+        extra="forbid",
+        validate_assignment=True,
+        validate_default=True,
+    )
 
 
 class StrictCamelModel(StrictModel):
-    class Config:
-        alias_generator = to_camel
-        allow_population_by_field_name = True
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
 
 
 def ensure_file(path: Path, mode: int, overwrite=False):
@@ -55,7 +54,7 @@ def check_file_mode(path: Path):
 
 
 def format_ini_lines(obj: BaseModel, exclude=None):
-    for field_name, field_config in obj.__fields__.items():
+    for field_name, field_config in obj.model_fields.items():
         if exclude is not None and field_name in exclude:
             continue
         field_val = getattr(obj, field_name)

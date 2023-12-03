@@ -13,6 +13,7 @@ from pydantic import (
     StringConstraints,
     SecretStr,
     PrivateAttr,
+    field_serializer,
 )
 from ruamel.yaml import YAML
 
@@ -88,7 +89,7 @@ class WgWizardConfig(StrictModel):
         yaml = YAML()
         yaml.indent(mapping=2, sequence=4, offset=2)
         if self._yaml is None:
-            yaml.dump(json.loads(self.json(exclude_unset=True)), path)
+            yaml.dump(json.loads(self.model_dump_json(exclude_unset=True)), path)
         else:
             yaml.dump(self._yaml, path)
 
@@ -110,7 +111,9 @@ class WgWizardConfig(StrictModel):
         if self._yaml is not None:
             if "peers" not in self._yaml:
                 self._yaml["peers"] = {}
-            self._yaml["peers"][name] = json.loads(peer_config.json(exclude_unset=True))
+            self._yaml["peers"][name] = json.loads(
+                peer_config.model_dump_json(exclude_unset=True)
+            )
 
 
 class WgWizardPeerSecret(StrictModel):
@@ -137,6 +140,10 @@ class WgWizardPeerSecret(StrictModel):
                 self.preshared_key.get_secret_value(), f"Peer {name} preshared_key"
             )
 
+    @field_serializer("private_key", "preshared_key", when_used="json")
+    def dump_secret(self, v):
+        return v.get_secret_value()
+
 
 class WgWizardSecret(StrictModel):
     private_key: SecretStr
@@ -155,6 +162,7 @@ class WgWizardSecret(StrictModel):
 
     def regenerate_server_secret(self):
         self.private_key, self.public_key = gen_key_pair()
+        self.issued_on = datetime.datetime.utcnow()
 
     @classmethod
     def from_file(cls, path: Path):
@@ -176,6 +184,10 @@ class WgWizardSecret(StrictModel):
         check_key_pair(self.private_key.get_secret_value(), self.public_key, "Server")
         for peer_name, peer_secret in self.peers.items():
             peer_secret.check(peer_name)
+
+    @field_serializer("private_key", when_used="json")
+    def dump_secret(self, v):
+        return v.get_secret_value()
 
 
 class WgWizard(StrictModel):
