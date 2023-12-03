@@ -8,17 +8,17 @@ from .utils import StrictCamelModel, format_ini_lines
 
 class WgQuickInterfaceConfig(StrictCamelModel):
     private_key: SecretStr
-    listen_port: Optional[int]
-    fw_mark: Optional[Literal["off"] | int]
-    address: list[IPvAnyInterface] = Field(min_items=1)
+    listen_port: Optional[int] = None
+    fw_mark: Optional[Literal["off"] | int] = None
+    address: list[IPvAnyInterface] = Field(min_length=1)
     dns: list[IPvAnyAddress] = Field(alias="DNS")
-    mtu: Optional[int] = Field(alias="MTU")
-    table: Optional[str]
+    mtu: Optional[int] = Field(None, alias="MTU")
+    table: Optional[str] = None
     pre_up: list[str]
     post_up: list[str]
     pre_down: list[str]
     post_down: list[str]
-    save_config: Optional[bool]
+    save_config: Optional[bool] = None
 
     def format_ini_lines(self) -> list[str]:
         yield "[Interface]"
@@ -26,12 +26,12 @@ class WgQuickInterfaceConfig(StrictCamelModel):
 
 
 class WgQuickPeerConfig(StrictCamelModel):
-    comment: Optional[str]
+    comment: Optional[str] = None
     public_key: str
-    preshared_key: Optional[SecretStr]
-    allowed_ips: list[IPvAnyInterface] = Field(alias="AllowedIPs", min_items=1)
-    endpoint: Optional[str]
-    persistent_keepalive: Optional[Literal["off"] | int]
+    preshared_key: Optional[SecretStr] = None
+    allowed_ips: list[IPvAnyInterface] = Field(alias="AllowedIPs", min_length=1)
+    endpoint: Optional[str] = None
+    persistent_keepalive: Optional[Literal["off"] | int] = None
 
     def format_ini_lines(self) -> list[str]:
         yield "[Peer]"

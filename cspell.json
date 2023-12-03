@@ -4,7 +4,9 @@
     "python"
   ],
   "words": [
+    "addoption",
     "bistiming",
+    "capsys",
     "distro",
     "genkey",
     "genpsk",

@@ -1,6 +1,7 @@
+import datetime
 from ipaddress import ip_interface
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 import json
 import logging
 
@@ -9,9 +10,10 @@ from pydantic import (
     Field,
     IPvAnyInterface,
     IPvAnyAddress,
-    constr,
+    StringConstraints,
     SecretStr,
     PrivateAttr,
+    field_serializer,
 )
 from ruamel.yaml import YAML
 
@@ -30,40 +32,45 @@ logger = logging.getLogger(__name__)
 
 
 class WgWizardPeerConfig(StrictModel):
-    listen_port: Optional[int]
-    fw_mark: Optional[Literal["off"] | int]
-    addresses: list[IPvAnyInterface] = Field(min_items=1)
+    listen_port: Optional[int] = None
+    fw_mark: Optional[Literal["off"] | int] = None
+    addresses: list[IPvAnyInterface] = Field(min_length=1)
     dns_addresses: list[IPvAnyAddress] = Field(default_factory=list)
-    mtu: Optional[int]
-    table: Optional[str]
+    mtu: Optional[int] = None
+    table: Optional[str] = None
     pre_up: list[str] = Field(default_factory=list)
     post_up: list[str] = Field(default_factory=list)
     pre_down: list[str] = Field(default_factory=list)
     post_down: list[str] = Field(default_factory=list)
-    server_allowed_ips: list[IPvAnyInterface] = Field(min_items=1)
-    server_endpoint: Optional[constr(regex=r".+:\d+")]  # noqa: F722
-    server_persistent_keepalive: Optional[Literal["off"] | int]
-    client_allowed_ips: list[IPvAnyInterface] = Field(min_items=1)
-    client_endpoint: Optional[constr(regex=r".+:\d+")]  # noqa: F722
-    client_persistent_keepalive: Optional[Literal["off"] | int]
+    server_allowed_ips: list[IPvAnyInterface] = Field(min_length=1)
+    server_endpoint: Optional[
+        Annotated[str, StringConstraints(pattern=r".+:\d+")]
+    ] = None
+    server_persistent_keepalive: Optional[Literal["off"] | int] = None
+    client_allowed_ips: list[IPvAnyInterface] = Field(min_length=1)
+    client_endpoint: Optional[
+        Annotated[str, StringConstraints(pattern=r".+:\d+")]
+    ] = None
+    client_persistent_keepalive: Optional[Literal["off"] | int] = None
 
 
 class WgWizardConfig(StrictModel):
-    name: constr(regex=r"[a-zA-Z0-9_=+.-]{1,15}")  # noqa: F722
+    name: Annotated[str, StringConstraints(pattern=r"[a-zA-Z0-9_=+.-]{1,15}")]
     listen_port: int
-    fw_mark: Optional[Literal["off"] | int]
-    addresses: list[IPvAnyInterface] = Field(min_items=1)
+    fw_mark: Optional[Literal["off"] | int] = None
+    addresses: list[IPvAnyInterface] = Field(min_length=1)
     # TODO: test DNS DHCP
     dns_addresses: list[IPvAnyAddress] = Field(default_factory=list)
-    mtu: Optional[int]
-    table: Optional[str]
+    mtu: Optional[int] = None
+    table: Optional[str] = None
     pre_up: list[str] = Field(default_factory=list)
     post_up: list[str] = Field(default_factory=list)
     pre_down: list[str] = Field(default_factory=list)
     post_down: list[str] = Field(default_factory=list)
-    default_endpoint: constr(regex=r".+:\d+")  # noqa: F722
+    default_endpoint: Annotated[str, StringConstraints(pattern=r".+:\d+")]
     peers: dict[
-        constr(regex=r"[a-zA-Z0-9_=+.-]+"), WgWizardPeerConfig  # noqa: F722
+        Annotated[str, StringConstraints(pattern=r"[a-zA-Z0-9_=+.-]+")],
+        WgWizardPeerConfig,
     ] = Field(default_factory=dict)
     _yaml: dict = PrivateAttr(default=None)
 
@@ -82,7 +89,7 @@ class WgWizardConfig(StrictModel):
         yaml = YAML()
         yaml.indent(mapping=2, sequence=4, offset=2)
         if self._yaml is None:
-            yaml.dump(json.loads(self.json(exclude_unset=True)), path)
+            yaml.dump(json.loads(self.model_dump_json(exclude_unset=True)), path)
         else:
             yaml.dump(self._yaml, path)
 
@@ -104,13 +111,16 @@ class WgWizardConfig(StrictModel):
         if self._yaml is not None:
             if "peers" not in self._yaml:
                 self._yaml["peers"] = {}
-            self._yaml["peers"][name] = json.loads(peer_config.json(exclude_unset=True))
+            self._yaml["peers"][name] = json.loads(
+                peer_config.model_dump_json(exclude_unset=True)
+            )
 
 
 class WgWizardPeerSecret(StrictModel):
     private_key: SecretStr
-    public_key: constr(min_length=1)
-    preshared_key: Optional[SecretStr]
+    public_key: str = Field(min_length=1)
+    preshared_key: Optional[SecretStr] = None
+    issued_on: Optional[datetime.datetime] = None
 
     @classmethod
     def generate(cls) -> "WgWizardPeerSecret":
@@ -120,6 +130,7 @@ class WgWizardPeerSecret(StrictModel):
             private_key=private_key,
             public_key=public_key,
             preshared_key=preshared_key,
+            issued_on=datetime.datetime.now(datetime.timezone.utc),
         )
 
     def check(self, name: str):
@@ -131,30 +142,40 @@ class WgWizardPeerSecret(StrictModel):
                 self.preshared_key.get_secret_value(), f"Peer {name} preshared_key"
             )
 
+    @field_serializer("private_key", "preshared_key", when_used="json-unless-none")
+    def dump_secret(self, v):
+        return v.get_secret_value()
+
 
 class WgWizardSecret(StrictModel):
     private_key: SecretStr
-    public_key: constr(min_length=1)
+    public_key: str = Field(min_length=1)
+    issued_on: Optional[datetime.datetime] = None
     peers: dict[str, WgWizardPeerSecret] = Field(default_factory=dict)
 
     @classmethod
     def generate(cls) -> "WgWizardSecret":
         private_key, public_key = gen_key_pair()
-        return cls(private_key=private_key, public_key=public_key)
+        return cls(
+            private_key=private_key,
+            public_key=public_key,
+            issued_on=datetime.datetime.now(datetime.timezone.utc),
+        )
 
     def regenerate_server_secret(self):
         self.private_key, self.public_key = gen_key_pair()
+        self.issued_on = datetime.datetime.now(datetime.timezone.utc)
 
     @classmethod
     def from_file(cls, path: Path):
         check_file_mode(path)
-        return cls.parse_file(path)
+        return cls.model_validate_json(path.read_text())
 
     def dump(self, path: Path, overwrite=False):
         path = path.resolve()
         logger.info("Writing secret to %s", path)
         ensure_file(path, mode=0o600, overwrite=overwrite)
-        path.write_text(self.json(indent=2))
+        path.write_text(self.model_dump_json(indent=2))
 
     def generate_peer_secret(self, name: str) -> WgWizardPeerSecret:
         peer_secret = WgWizardPeerSecret.generate()
@@ -165,6 +186,10 @@ class WgWizardSecret(StrictModel):
         check_key_pair(self.private_key.get_secret_value(), self.public_key, "Server")
         for peer_name, peer_secret in self.peers.items():
             peer_secret.check(peer_name)
+
+    @field_serializer("private_key", when_used="json")
+    def dump_secret(self, v):
+        return v.get_secret_value()
 
 
 class WgWizard(StrictModel):
