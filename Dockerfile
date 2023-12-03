@@ -16,7 +16,7 @@ RUN set -x && DEBIAN_FRONTEND=noninteractive \
     && rm -rf /var/lib/apt/lists/*
 
 ENV HOME=/root
-ENV POETRY_VERSION=1.3.2
+ENV POETRY_VERSION=1.7.1
 # Poetry use VIRTUAL_ENV to check whether we are already in a virtual env
 ENV VIRTUAL_ENV=${HOME}/venv
 ENV POETRY_HOME=${HOME}/.poetry
@@ -27,7 +27,7 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 # install poetry
 RUN --mount=type=cache,target=${HOME}/.cache --mount=type=cache,target=${HOME}/.cargo set -x \
     && python -m venv "${POETRY_HOME}" \
-    && "${POETRY_HOME}/bin/pip" install -U pip==22.3.1 wheel==0.38.4 setuptools==66.1.1 \
+    && "${POETRY_HOME}/bin/pip" install -U pip==23.3.1 wheel==0.42.0 setuptools==69.0.2 \
     && "${POETRY_HOME}/bin/pip" install "poetry==${POETRY_VERSION}"
 
 # install python packages
@@ -35,7 +35,7 @@ COPY pyproject.toml poetry.lock /tmp/poetry/
 RUN --mount=type=cache,target=${HOME}/.cache set -x \
     && cd /tmp/poetry/ \
     && python -m venv "${VIRTUAL_ENV}" \
-    && pip install --upgrade pip==22.3.1 wheel==0.38.4 setuptools==66.1.1 \
+    && pip install --upgrade pip==23.3.1 wheel==0.42.0 setuptools==69.0.2 \
     && poetry install --no-interaction --no-ansi --only main --no-root \
     && rm -rf /tmp/poetry/
 
