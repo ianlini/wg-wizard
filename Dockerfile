@@ -5,13 +5,6 @@ RUN set -x && DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         wireguard-tools \
-    && { \
-      if [ "${TARGETPLATFORM}" = 'linux/arm/v7' ]; then \
-        # for poetry's dependencies if the wheels are not provided for the architecture
-        apt-get install -y --no-install-recommends \
-          build-essential libssl-dev libffi-dev cargo git; \
-      fi; \
-    } \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
