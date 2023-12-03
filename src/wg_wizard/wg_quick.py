@@ -10,7 +10,7 @@ class WgQuickInterfaceConfig(StrictCamelModel):
     private_key: SecretStr
     listen_port: Optional[int]
     fw_mark: Optional[Literal["off"] | int]
-    address: list[IPvAnyInterface] = Field(min_items=1)
+    address: list[IPvAnyInterface] = Field(min_length=1)
     dns: list[IPvAnyAddress] = Field(alias="DNS")
     mtu: Optional[int] = Field(alias="MTU")
     table: Optional[str]
@@ -29,7 +29,7 @@ class WgQuickPeerConfig(StrictCamelModel):
     comment: Optional[str]
     public_key: str
     preshared_key: Optional[SecretStr]
-    allowed_ips: list[IPvAnyInterface] = Field(alias="AllowedIPs", min_items=1)
+    allowed_ips: list[IPvAnyInterface] = Field(alias="AllowedIPs", min_length=1)
     endpoint: Optional[str]
     persistent_keepalive: Optional[Literal["off"] | int]
 

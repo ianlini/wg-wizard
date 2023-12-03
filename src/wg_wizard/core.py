@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class WgWizardPeerConfig(StrictModel):
     listen_port: Optional[int] = None
     fw_mark: Optional[Literal["off"] | int] = None
-    addresses: list[IPvAnyInterface] = Field(min_items=1)
+    addresses: list[IPvAnyInterface] = Field(min_length=1)
     dns_addresses: list[IPvAnyAddress] = Field(default_factory=list)
     mtu: Optional[int] = None
     table: Optional[str] = None
@@ -41,12 +41,12 @@ class WgWizardPeerConfig(StrictModel):
     post_up: list[str] = Field(default_factory=list)
     pre_down: list[str] = Field(default_factory=list)
     post_down: list[str] = Field(default_factory=list)
-    server_allowed_ips: list[IPvAnyInterface] = Field(min_items=1)
+    server_allowed_ips: list[IPvAnyInterface] = Field(min_length=1)
     server_endpoint: Optional[
         Annotated[str, StringConstraints(pattern=r".+:\d+")]
     ] = None
     server_persistent_keepalive: Optional[Literal["off"] | int] = None
-    client_allowed_ips: list[IPvAnyInterface] = Field(min_items=1)
+    client_allowed_ips: list[IPvAnyInterface] = Field(min_length=1)
     client_endpoint: Optional[
         Annotated[str, StringConstraints(pattern=r".+:\d+")]
     ] = None
@@ -57,7 +57,7 @@ class WgWizardConfig(StrictModel):
     name: Annotated[str, StringConstraints(pattern=r"[a-zA-Z0-9_=+.-]{1,15}")]
     listen_port: int
     fw_mark: Optional[Literal["off"] | int] = None
-    addresses: list[IPvAnyInterface] = Field(min_items=1)
+    addresses: list[IPvAnyInterface] = Field(min_length=1)
     # TODO: test DNS DHCP
     dns_addresses: list[IPvAnyAddress] = Field(default_factory=list)
     mtu: Optional[int] = None
@@ -115,7 +115,7 @@ class WgWizardConfig(StrictModel):
 
 class WgWizardPeerSecret(StrictModel):
     private_key: SecretStr
-    public_key: Annotated[str, StringConstraints(min_length=1)]
+    public_key: str = Field(min_length=1)
     preshared_key: Optional[SecretStr] = None
 
     @classmethod
@@ -140,7 +140,7 @@ class WgWizardPeerSecret(StrictModel):
 
 class WgWizardSecret(StrictModel):
     private_key: SecretStr
-    public_key: Annotated[str, StringConstraints(min_length=1)]
+    public_key: str = Field(min_length=1)
     issued_on: Optional[datetime.datetime] = None
     peers: dict[str, WgWizardPeerSecret] = Field(default_factory=dict)
 
@@ -159,13 +159,13 @@ class WgWizardSecret(StrictModel):
     @classmethod
     def from_file(cls, path: Path):
         check_file_mode(path)
-        return cls.parse_file(path)
+        return cls.model_validate_json(path.read_text())
 
     def dump(self, path: Path, overwrite=False):
         path = path.resolve()
         logger.info("Writing secret to %s", path)
         ensure_file(path, mode=0o600, overwrite=overwrite)
-        path.write_text(self.json(indent=2))
+        path.write_text(self.model_dump_json(indent=2))
 
     def generate_peer_secret(self, name: str) -> WgWizardPeerSecret:
         peer_secret = WgWizardPeerSecret.generate()
