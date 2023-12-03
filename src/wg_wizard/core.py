@@ -142,7 +142,7 @@ class WgWizardPeerSecret(StrictModel):
                 self.preshared_key.get_secret_value(), f"Peer {name} preshared_key"
             )
 
-    @field_serializer("private_key", "preshared_key", when_used="json")
+    @field_serializer("private_key", "preshared_key", when_used="json-unless-none")
     def dump_secret(self, v):
         return v.get_secret_value()
 
