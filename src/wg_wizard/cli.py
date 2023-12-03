@@ -56,9 +56,9 @@ def main():
 @option(
     "--default-endpoint",
     "-e",
-    prompt="The default endpoint in clients' Peer.Endpoint configs (e.g., example.com:51280)",
+    prompt="The default endpoint in clients' Peer.Endpoint configs (e.g., example.com:51820)",
     help="""
-        The default endpoint in clients' Peer.Endpoint configs (e.g., example.com:51280).
+        The default endpoint in clients' Peer.Endpoint configs (e.g., example.com:51820).
         If the port is not provided, it will be added automatically according to the listen_port.
         The endpoint can also be overridden in peer configs.
     """,

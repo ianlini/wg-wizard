@@ -78,7 +78,7 @@ Follow the instruction to create the config. Example output:
    Interface name for WireGuard [wg0]:
    Interface.ListenPort of the relay server [51820]:
    Interface.Address of the relay server [192.168.10.1/24]:
-   The default endpoint in clients' Peer.Endpoint configs (e.g., example.com:51280): example.com
+   The default endpoint in clients' Peer.Endpoint configs (e.g., example.com:51820): example.com
    If you want to allow the clients to access the internet via the relay server, you must provide the interface name you want to forward the internet traffic to. It's usually eth0 or wlan0. You can check it by executing `ip addr`. If you provide an interface name {interface}, the following rules will be added:
    - iptables -A FORWARD -i %i -o {interface} -j ACCEPT
    - iptables -A FORWARD -i {interface} -o %i -j ACCEPT
