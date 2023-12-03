@@ -120,6 +120,7 @@ class WgWizardPeerSecret(StrictModel):
     private_key: SecretStr
     public_key: str = Field(min_length=1)
     preshared_key: Optional[SecretStr] = None
+    issued_on: Optional[datetime.datetime] = None
 
     @classmethod
     def generate(cls) -> "WgWizardPeerSecret":
@@ -129,6 +130,7 @@ class WgWizardPeerSecret(StrictModel):
             private_key=private_key,
             public_key=public_key,
             preshared_key=preshared_key,
+            issued_on=datetime.datetime.utcnow(),
         )
 
     def check(self, name: str):
