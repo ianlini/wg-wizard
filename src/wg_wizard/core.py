@@ -1,6 +1,7 @@
+import datetime
 from ipaddress import ip_interface
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 import json
 import logging
 
@@ -9,7 +10,7 @@ from pydantic import (
     Field,
     IPvAnyInterface,
     IPvAnyAddress,
-    constr,
+    StringConstraints,
     SecretStr,
     PrivateAttr,
 )
@@ -30,40 +31,45 @@ logger = logging.getLogger(__name__)
 
 
 class WgWizardPeerConfig(StrictModel):
-    listen_port: Optional[int]
-    fw_mark: Optional[Literal["off"] | int]
+    listen_port: Optional[int] = None
+    fw_mark: Optional[Literal["off"] | int] = None
     addresses: list[IPvAnyInterface] = Field(min_items=1)
     dns_addresses: list[IPvAnyAddress] = Field(default_factory=list)
-    mtu: Optional[int]
-    table: Optional[str]
+    mtu: Optional[int] = None
+    table: Optional[str] = None
     pre_up: list[str] = Field(default_factory=list)
     post_up: list[str] = Field(default_factory=list)
     pre_down: list[str] = Field(default_factory=list)
     post_down: list[str] = Field(default_factory=list)
     server_allowed_ips: list[IPvAnyInterface] = Field(min_items=1)
-    server_endpoint: Optional[constr(regex=r".+:\d+")]  # noqa: F722
-    server_persistent_keepalive: Optional[Literal["off"] | int]
+    server_endpoint: Optional[
+        Annotated[str, StringConstraints(pattern=r".+:\d+")]
+    ] = None
+    server_persistent_keepalive: Optional[Literal["off"] | int] = None
     client_allowed_ips: list[IPvAnyInterface] = Field(min_items=1)
-    client_endpoint: Optional[constr(regex=r".+:\d+")]  # noqa: F722
-    client_persistent_keepalive: Optional[Literal["off"] | int]
+    client_endpoint: Optional[
+        Annotated[str, StringConstraints(pattern=r".+:\d+")]
+    ] = None
+    client_persistent_keepalive: Optional[Literal["off"] | int] = None
 
 
 class WgWizardConfig(StrictModel):
-    name: constr(regex=r"[a-zA-Z0-9_=+.-]{1,15}")  # noqa: F722
+    name: Annotated[str, StringConstraints(pattern=r"[a-zA-Z0-9_=+.-]{1,15}")]
     listen_port: int
-    fw_mark: Optional[Literal["off"] | int]
+    fw_mark: Optional[Literal["off"] | int] = None
     addresses: list[IPvAnyInterface] = Field(min_items=1)
     # TODO: test DNS DHCP
     dns_addresses: list[IPvAnyAddress] = Field(default_factory=list)
-    mtu: Optional[int]
-    table: Optional[str]
+    mtu: Optional[int] = None
+    table: Optional[str] = None
     pre_up: list[str] = Field(default_factory=list)
     post_up: list[str] = Field(default_factory=list)
     pre_down: list[str] = Field(default_factory=list)
     post_down: list[str] = Field(default_factory=list)
-    default_endpoint: constr(regex=r".+:\d+")  # noqa: F722
+    default_endpoint: Annotated[str, StringConstraints(pattern=r".+:\d+")]
     peers: dict[
-        constr(regex=r"[a-zA-Z0-9_=+.-]+"), WgWizardPeerConfig  # noqa: F722
+        Annotated[str, StringConstraints(pattern=r"[a-zA-Z0-9_=+.-]+")],
+        WgWizardPeerConfig,
     ] = Field(default_factory=dict)
     _yaml: dict = PrivateAttr(default=None)
 
@@ -109,8 +115,8 @@ class WgWizardConfig(StrictModel):
 
 class WgWizardPeerSecret(StrictModel):
     private_key: SecretStr
-    public_key: constr(min_length=1)
-    preshared_key: Optional[SecretStr]
+    public_key: Annotated[str, StringConstraints(min_length=1)]
+    preshared_key: Optional[SecretStr] = None
 
     @classmethod
     def generate(cls) -> "WgWizardPeerSecret":
@@ -134,13 +140,18 @@ class WgWizardPeerSecret(StrictModel):
 
 class WgWizardSecret(StrictModel):
     private_key: SecretStr
-    public_key: constr(min_length=1)
+    public_key: Annotated[str, StringConstraints(min_length=1)]
+    issued_on: Optional[datetime.datetime] = None
     peers: dict[str, WgWizardPeerSecret] = Field(default_factory=dict)
 
     @classmethod
     def generate(cls) -> "WgWizardSecret":
         private_key, public_key = gen_key_pair()
-        return cls(private_key=private_key, public_key=public_key)
+        return cls(
+            private_key=private_key,
+            public_key=public_key,
+            issued_on=datetime.datetime.utcnow(),
+        )
 
     def regenerate_server_secret(self):
         self.private_key, self.public_key = gen_key_pair()
